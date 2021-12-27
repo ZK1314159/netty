@@ -1,0 +1,58 @@
+package nia.chapter2.echoserver;
+
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.EventLoop;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+
+import java.net.InetSocketAddress;
+
+/**
+ * Listing 2.2 EchoServer class
+ *
+ * @author <a href="mailto:norman.maurer@gmail.com">Norman Maurer</a>
+ */
+public class EchoServer {
+
+    private final int port;
+
+    public EchoServer(int port) {
+        this.port = port;
+    }
+
+    public static void main(String[] args) throws Exception {
+        final int port = 30001;
+        new EchoServer(port).start();
+    }
+
+    public void start() throws Exception {
+        final EchoServerHandler serverHandler = new EchoServerHandler();
+        EventLoopGroup group = new NioEventLoopGroup();
+        try {
+            ServerBootstrap b = new ServerBootstrap();
+            b.group(group)
+                .channel(NioServerSocketChannel.class)
+                .localAddress(new InetSocketAddress(port))
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    public void initChannel(SocketChannel ch) throws Exception {
+                        ch.pipeline().addLast(serverHandler);
+                    }
+                });
+            // bind(): Create a new Channel and bind it
+            ChannelFuture f = b.bind().sync();
+            System.out.println(EchoServer.class.getName() +
+                " started and listening for connections on " + f.channel().localAddress());
+            // 获取closeFuture，调用sync()，在channel关闭之前主线程都会阻塞
+            f.channel().closeFuture().sync();
+        } finally {
+            group.shutdownGracefully().sync();
+        }
+    }
+
+}
