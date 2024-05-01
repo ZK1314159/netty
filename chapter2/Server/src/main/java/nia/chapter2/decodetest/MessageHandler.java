@@ -11,15 +11,15 @@ import io.netty.channel.SimpleChannelInboundHandler;
  */
 public class MessageHandler extends SimpleChannelInboundHandler {
 
-    @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        String message = (String) msg;
-        System.out.println(message);
-    }
+  @Override
+  protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
+    String message = (String) msg;
+    System.out.println(message);
+  }
 
-    @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        ctx.channel().close();
-    }
+  @Override
+  public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+    ctx.channel().close();
+  }
 
 }
